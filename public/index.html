@@ -556,7 +556,6 @@
     <a href="/" class="nl active">Home</a>
     <a href="/session" class="nl">Session</a>
     <a href="/plugins" class="nl">Plugins</a>
-    <a href="/admin" class="nl">Admin</a>
     <a href="https://t.me/xmegatronwa" target="_blank" class="nl">Telegram</a>
     <a href="/session" class="nl cta"><i class="fas fa-key"></i> Get Session</a>
   </div>
@@ -599,11 +598,11 @@
     <!-- LIVE STATS -->
     <div class="stats-wrap">
       <div class="stat">
-        <div class="stat-n" id="sp">70</div>
+        <div class="stat-n" id="sp">0</div>
         <div class="stat-l">Pair Sessions</div>
       </div>
       <div class="stat">
-        <div class="stat-n" id="sq">70</div>
+        <div class="stat-n" id="sq">0</div>
         <div class="stat-l">QR Sessions</div>
       </div>
       <div class="stat">
@@ -681,8 +680,8 @@
         <div class="step"><div class="sn">1</div><div class="sc"><div class="st">Fork on GitHub</div><div class="sd">Fork the X MEGATRON repo to your GitHub account.</div></div></div>
         <div class="step"><div class="sn">2</div><div class="sc"><div class="st">New Web Service on Render</div><div class="sd">Go to <strong style="color:var(--text)">render.com</strong> → New → Web Service → connect your fork. Runtime: <strong style="color:var(--blue2)">Node</strong>. Build: <code style="color:var(--blue2)">npm install</code>. Start: <code style="color:var(--blue2)">npm start</code>.</div></div></div>
         <div class="step"><div class="sn">3</div><div class="sc"><div class="st">Set Environment Variables</div><div class="sd">In the Environment tab on Render, add:</div>
-          <div class="codeblock">SESSION=xmegatron~your_paste_id<br>ADMIN_SECRET=your_secret_here<button class="ci" onclick="cpb(this,'SESSION=xmegatron~your_paste_id
-ADMIN_SECRET=your_secret_here')">copy</button></div>
+          <div class="codeblock">SESSION_ID=xmegatron~xxxxx<br>PREFIX=.<button class="ci" onclick="cpb(this,'SESSION=xmegatron~your_id
+PREFIX=your_prefix')">copy</button></div>
         </div></div>
         <div class="step"><div class="sn">4</div><div class="sc"><div class="st">Deploy</div><div class="sd">Click Deploy Web Service. Render handles HTTPS, restarts, and zero-downtime deploys. Free tier available. All 4 pages go live at your Render URL.</div></div></div>
       </div>
@@ -690,7 +689,7 @@ ADMIN_SECRET=your_secret_here')">copy</button></div>
       <div id="dp-koyeb" class="dpanel">
         <div class="step"><div class="sn">1</div><div class="sc"><div class="st">Sign up at Koyeb</div><div class="sd">Go to <strong style="color:var(--text)">koyeb.com</strong> → Create a new App → connect GitHub fork.</div></div></div>
         <div class="step"><div class="sn">2</div><div class="sc"><div class="st">Configure the service</div><div class="sd">Runtime: Node.js 20 &nbsp;·&nbsp; Build: <code style="color:var(--blue2)">npm install</code> &nbsp;·&nbsp; Start: <code style="color:var(--blue2)">npm start</code>. Port: <code style="color:var(--blue2)">3000</code>.</div></div></div>
-        <div class="step"><div class="sn">3</div><div class="sc"><div class="st">Add Environment Variables</div><div class="sd">SESSION, ADMIN_SECRET, BOT_TOKEN (optional). Koyeb auto-assigns PORT.</div></div></div>
+        <div class="step"><div class="sn">3</div><div class="sc"><div class="st">Add Environment Variables</div><div class="sd">SESSION, PREFIX. Koyeb auto-assigns PORT.</div></div></div>
         <div class="step"><div class="sn">4</div><div class="sc"><div class="st">Deploy</div><div class="sd">Click Deploy. Koyeb runs on global edge with auto-scaling. Bot goes live in seconds.</div></div></div>
       </div>
 
@@ -702,8 +701,8 @@ ADMIN_SECRET=your_secret_here')">copy</button></div>
           <div class="codeblock">git clone https://github.com/COD-LUCAS/x-megatron && cd x-megatron && npm install<button class="ci" onclick="cpb(this,'git clone https://github.com/COD-LUCAS/x-megatron && cd x-megatron && npm install')">copy</button></div>
         </div></div>
         <div class="step"><div class="sn">3</div><div class="sc"><div class="st">Create .env file</div>
-          <div class="codeblock">SESSION=xmegatron~paste_id<br>ADMIN_SECRET=your_secret<br>PORT=3000<button class="ci" onclick="cpb(this,'SESSION=xmegatron~paste_id
-ADMIN_SECRET=your_secret
+          <div class="codeblock">SESSION=xmegatron~your_id<br>PREFIX=your_prefix<br>PORT=3000<button class="ci" onclick="cpb(this,'SESSION=xmegatron~your_id
+PREFIX=your_prefix
 PORT=3000')">copy</button></div>
         </div></div>
         <div class="step"><div class="sn">4</div><div class="sc"><div class="st">Start with PM2 (stays running after SSH close)</div>
@@ -768,7 +767,7 @@ PORT=3000')">copy</button></div>
 
 <script>
   // ── LIVE STATS ──────────────────────────────────────────────
-  let lp = 70, lq = 70;
+  let lp = 64, lq = 17;
 
   async function loadStats() {
     try {
