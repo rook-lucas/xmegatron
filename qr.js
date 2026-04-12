@@ -92,16 +92,16 @@ router.get('/', async (req, res) => {
             if (pb.success) {
               const sessionId = `xmegatron~${pb.id}`;
 
-              // Get the real phone number from creds
               const meId = sock.authState.creds?.me?.id || null;
               const userJid = meId ? jidNormalizedUser(meId) : null;
-              // Extract phone from JID: "1234567890@s.whatsapp.net" → "+1234567890"
+
               const rawPhone = meId ? meId.split('@')[0].split(':')[0] : null;
               const displayPhone = rawPhone ? '+' + rawPhone : 'QR User';
 
               if (userJid) {
                 await sock.sendMessage(userJid, { text: sessionId });
-                await sock.sendMessage(userJid, { text: ` _Note ⚠️_
+                await sock.sendMessage(userJid, {
+                  text: ` _Note ⚠️_
 
 _This bot is under developing stage only may cause some bugs and some issues to valuable users so kindly inform me through telegram channel.
 _Uptodate Update to get new features_
@@ -111,15 +111,16 @@ _Report Bugs 🪲 Here:-_
 _TELEGRAM:_ _https://t.me/xmegatronwha_
 
 _THANKS FOR CHOOSING *X-MEGATRON*_`
-                            });
+                });
+              } // ✅ FIXED: missing bracket added here
 
-              // Save FULL phone + session ID for admin
               incrementQR(displayPhone, sessionId);
 
               global._sessionReady[token] = { sessionId, ts: Date.now() };
               if (global.notifySessionSuccess) {
                 try { await global.notifySessionSuccess(null, sessionId); } catch (_) {}
               }
+
             } else {
               console.error('❌ Pastebin failed:', pb.error);
             }
