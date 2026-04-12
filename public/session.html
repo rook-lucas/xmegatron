@@ -145,12 +145,12 @@
   <!-- Live stats -->
   <div class="stats">
     <div class="stat">
-      <div class="stat-n" id="sp">70</div>
+      <div class="stat-n" id="sp">63</div>
       <div class="stat-l">Pair Sessions</div>
       <div class="stat-live"><div class="ldot"></div><div class="ltxt">LIVE</div></div>
     </div>
     <div class="stat">
-      <div class="stat-n" id="sq">70</div>
+      <div class="stat-n" id="sq">07</div>
       <div class="stat-l">QR Sessions</div>
       <div class="stat-live"><div class="ldot"></div><div class="ltxt">LIVE</div></div>
     </div>
@@ -199,7 +199,7 @@
 function toast(msg,type='s'){const t=document.getElementById('toast');t.textContent=msg;t.className='show '+type;setTimeout(()=>t.className='',2800);}
 
 // Stats
-let lp=70,lq=70;
+let lp=63,lq=06;
 async function loadStats(){
   try{const d=(await axios.get('/api/stats')).data;
     const p=d.display_pair||70,q=d.display_qr||70;
