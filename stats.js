@@ -9,7 +9,7 @@ const __dirname  = path.dirname(fileURLToPath(import.meta.url));
 const DATA_DIR   = path.join(__dirname, 'data');
 const STATS_FILE = path.join(DATA_DIR, 'stats.json');
 
-export const BASE = { pair: 70, qr: 70 };
+export const BASE = { pair: 0, qr: 0 };
 
 if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
 
