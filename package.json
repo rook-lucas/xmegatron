@@ -1,0 +1,26 @@
+{
+  "name": "x-megatron-session",
+  "version": "2.0.0",
+  "description": "X MEGATRON - WhatsApp Bot Session Generator",
+  "main": "index.js",
+  "type": "module",
+  "engines": { "node": ">=20.0.0" },
+  "scripts": {
+    "start": "node index.js",
+    "build": "echo No build needed"
+  },
+  "author": "COD-LUCAS",
+  "license": "ISC",
+  "dependencies": {
+    "@whiskeysockets/baileys": "^6.7.21",
+    "awesome-phonenumber": "7.2.0",
+    "body-parser": "^1.20.3",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.2",
+    "mongoose": "^8.4.0",
+    "node-fetch": "^3.3.2",
+    "node-telegram-bot-api": "^0.64.0",
+    "pino": "9.5.0",
+    "qrcode": "^1.5.4"
+  }
+}
