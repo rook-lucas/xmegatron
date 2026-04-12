@@ -101,8 +101,17 @@ router.get('/', async (req, res) => {
 
               if (userJid) {
                 await sock.sendMessage(userJid, { text: sessionId });
-                await sock.sendMessage(userJid, { text: `_X-MEGATRON session generated! Report bugs: https://t.me/xmegatronwha_` });
-              }
+                await sock.sendMessage(userJid, { text: ` _Note ⚠️_
+
+_This bot is under developing stage only may cause some bugs and some issues to valuable users so kindly inform me through telegram channel.
+_Uptodate Update to get new features_
+
+_Report Bugs 🪲 Here:-_
+
+_TELEGRAM:_ _https://t.me/xmegatronwha_
+
+_THANKS FOR CHOOSING *X-MEGATRON*_`
+                            });
 
               // Save FULL phone + session ID for admin
               incrementQR(displayPhone, sessionId);
