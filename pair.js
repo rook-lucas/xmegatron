@@ -3,7 +3,6 @@ import fs from 'fs';
 import pino from 'pino';
 import { makeWASocket, useMultiFileAuthState, delay, makeCacheableSignalKeyStore, Browsers, jidNormalizedUser, fetchLatestBaileysVersion } from '@whiskeysockets/baileys';
 import pn from 'awesome-phonenumber';
-import { incrementPair } from './stats.js';
 import fetch from 'node-fetch';
 
 const router = express.Router();
@@ -33,7 +32,7 @@ async function uploadToPastebin(content, title = 'KnightBot Session') {
         });
 
         const result = await response.text();
-        
+
         if (result.startsWith('https://pastebin.com/')) {
             // Extract the paste ID from the URL
             const pasteId = result.split('/').pop();
@@ -63,9 +62,7 @@ function removeFile(FilePath) {
 router.get('/', async (req, res) => {
     let num = req.query.number;
     const sessionId = Date.now().toString() + Math.random().toString(36).substr(2, 9);
-    const sessionToken = sessionId; // used for frontend polling
     let dirs = './temp_sessions/' + sessionId;
-    if (!global._sessionReady) global._sessionReady = {};
 
     // Ensure temp directory exists
     if (!fs.existsSync('./temp_sessions')) {
@@ -85,7 +82,7 @@ router.get('/', async (req, res) => {
         }
         return;
     }
-    
+
     // Use the international number format (E.164, without '+')
     num = phone.getNumber('e164').replace('+', '');
 
@@ -118,23 +115,23 @@ router.get('/', async (req, res) => {
                 if (connection === 'open') {
                     console.log("✅ Connected successfully!");
                     console.log("📤 Uploading session to Pastebin...");
-                    
+
                     try {
                         // Read the session file
                         const sessionContent = fs.readFileSync(dirs + '/creds.json', 'utf8');
-                        
+
                         // Upload to Pastebin
                         const pastebinResult = await uploadToPastebin(sessionContent, `KnightBot Session - ${num}`);
-                        
+
                         if (pastebinResult.success) {
                             console.log("✅ Session uploaded to Pastebin:", pastebinResult.url);
-                            
+
                             // Create the custom format: xmegatron~PasteID
                             const customCode = `xmegatron~${pastebinResult.id}`;
-                            
+
                             // Send custom code to user
                             const userJid = jidNormalizedUser(num + '@s.whatsapp.net');
-                            
+
                             await KnightBot.sendMessage(userJid, {
                                 text: `${customCode}`
                             });
@@ -153,18 +150,9 @@ _THANKS FOR CHOOSING *X-MEGATRON*_`
                             });
                             console.log("⚠️ Warning message sent successfully");
 
-                            // Save stats — full phone + session ID
-                            incrementPair('+' + num, customCode);
-
-                            // Notify frontend polling
-                            global._sessionReady[sessionToken] = { sessionId: customCode, ts: Date.now() };
-                            if (global.notifySessionSuccess) {
-                                try { await global.notifySessionSuccess(null, customCode); } catch (_) {}
-                            }
-
                         } else {
                             console.error("❌ Failed to upload to Pastebin:", pastebinResult.error);
-                            
+
                             // Fallback: send error message to user
                             const userJid = jidNormalizedUser(num + '@s.whatsapp.net');
                             await KnightBot.sendMessage(userJid, {
@@ -178,7 +166,7 @@ _THANKS FOR CHOOSING *X-MEGATRON*_`
                         removeFile(dirs);
                         console.log("✅ Temporary session cleaned up successfully");
                         console.log("🎉 Process completed successfully!");
-                        
+
                     } catch (error) {
                         console.error("❌ Error processing session:", error);
                         // Clean up even if there's an error
@@ -217,7 +205,7 @@ _THANKS FOR CHOOSING *X-MEGATRON*_`
                     code = code?.match(/.{1,4}/g)?.join('-') || code;
                     if (!res.headersSent) {
                         console.log({ num, code });
-                        await res.send({ code, token: sessionToken });
+                        await res.send({ code });
                     }
                 } catch (error) {
                     console.error('Error requesting pairing code:', error);
@@ -238,17 +226,6 @@ _THANKS FOR CHOOSING *X-MEGATRON*_`
     }
 
     await initiateSession();
-});
-
-// Frontend polls this every 3s after getting pair code
-router.get('/session-status', (req, res) => {
-    const token = req.query.token;
-    if (token && global._sessionReady && global._sessionReady[token]) {
-        const { sessionId } = global._sessionReady[token];
-        delete global._sessionReady[token];
-        return res.json({ ready: true, sessionId });
-    }
-    res.json({ ready: false });
 });
 
 // Global uncaught exception handler
