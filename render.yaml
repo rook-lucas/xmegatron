@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: x-megatron
+    runtime: node
+    plan: free
+    region: oregon
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: NODE_VERSION
+        value: 20
+      - key: ADMIN_SECRET
+        sync: false
+      - key: BOT_TOKEN
+        sync: false
