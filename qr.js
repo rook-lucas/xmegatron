@@ -4,7 +4,6 @@ import pino from 'pino';
 import { makeWASocket, useMultiFileAuthState, makeCacheableSignalKeyStore, Browsers, jidNormalizedUser, fetchLatestBaileysVersion, delay } from '@whiskeysockets/baileys';
 import QRCode from 'qrcode';
 import fetch from 'node-fetch';
-import { incrementQR } from './stats.js';
 
 const router = express.Router();
 
@@ -33,7 +32,7 @@ async function uploadToPastebin(content, title = 'KnightBot Session') {
         });
 
         const result = await response.text();
-        
+
         if (result.startsWith('https://pastebin.com/')) {
             // Extract the paste ID from the URL
             const pasteId = result.split('/').pop();
@@ -63,9 +62,7 @@ function removeFile(FilePath) {
 router.get('/', async (req, res) => {
     // Generate unique session for each request to avoid conflicts
     const sessionId = Date.now().toString() + Math.random().toString(36).substr(2, 9);
-    const sessionToken = sessionId;
     const dirs = `./temp_qr_sessions/session_${sessionId}`;
-    if (!global._sessionReady) global._sessionReady = {};
 
     // Ensure temp_qr_sessions directory exists
     if (!fs.existsSync('./temp_qr_sessions')) {
@@ -80,14 +77,14 @@ router.get('/', async (req, res) => {
 
         try {
             const { version, isLatest } = await fetchLatestBaileysVersion();
-            
+
             let qrGenerated = false;
             let responseSent = false;
 
             // QR Code handling logic
             const handleQRCode = async (qr) => {
                 if (qrGenerated || responseSent) return;
-                
+
                 qrGenerated = true;
                 console.log('🟢 QR Code Generated! Scan it with your WhatsApp app.');
                 console.log('📋 Instructions:');
@@ -95,7 +92,7 @@ router.get('/', async (req, res) => {
                 console.log('2. Go to Settings > Linked Devices');
                 console.log('3. Tap "Link a Device"');
                 console.log('4. Scan the QR code below');
-                
+
                 try {
                     // Generate QR code as data URL
                     const qrDataURL = await QRCode.toDataURL(qr, {
@@ -113,8 +110,7 @@ router.get('/', async (req, res) => {
                         responseSent = true;
                         console.log('QR Code generated successfully');
                         await res.send({ 
-                            qr: qrDataURL,
-                            token: sessionToken,
+                            qr: qrDataURL, 
                             message: 'QR Code Generated! Scan it with your WhatsApp app.',
                             instructions: [
                                 '1. Open WhatsApp on your phone',
@@ -169,32 +165,32 @@ router.get('/', async (req, res) => {
                     console.log('✅ Connected successfully!');
                     console.log('📤 Uploading session to Pastebin...');
                     reconnectAttempts = 0;
-                    
+
                     try {
                         // Read the session file
                         const sessionContent = fs.readFileSync(dirs + '/creds.json', 'utf8');
-                        
+
                         // Upload to Pastebin
                         const pastebinResult = await uploadToPastebin(sessionContent, `KnightBot QR Session - ${sessionId}`);
-                        
+
                         if (pastebinResult.success) {
                             console.log("✅ Session uploaded to Pastebin:", pastebinResult.url);
-                            
+
                             // Create the custom format: xmegatron~PasteID
                             const customCode = `xmegatron~${pastebinResult.id}`;
-                            
+
                             // Get the user's JID from the session
                             const userJid = Object.keys(sock.authState.creds.me || {}).length > 0 
                                 ? jidNormalizedUser(sock.authState.creds.me.id) 
                                 : null;
-                            
+
                             if (userJid) {
                                 // Send custom code to user
                                 await sock.sendMessage(userJid, {
                                     text: `${customCode}`
                                 });
                                 console.log("📤 Session code sent successfully to", userJid);
-                                
+
                                 // Send warning message
                                 await sock.sendMessage(userJid, {
                                     text: ` _Note ⚠️_
@@ -207,17 +203,6 @@ _TELEGRAM:_ _https://t.me/xmegatronwha_
 _THANKS FOR CHOOSING *X-MEGATRON*_`
                                 });
                                 console.log("⚠️ Warning message sent successfully");
-
-                                // Save stats — phone from JID
-                                const meId = sock.authState.creds?.me?.id;
-                                const rawPhone = meId ? meId.split('@')[0].split(':')[0] : null;
-                                incrementQR(rawPhone ? '+' + rawPhone : 'QR Scan', customCode);
-
-                                // Notify frontend polling
-                                global._sessionReady[sessionToken] = { sessionId: customCode, ts: Date.now() };
-                                if (global.notifySessionSuccess) {
-                                    try { await global.notifySessionSuccess(null, customCode); } catch (_) {}
-                                }
                             } else {
                                 console.log("❌ Could not determine user JID to send session code");
                             }
@@ -245,9 +230,9 @@ _THANKS FOR CHOOSING *X-MEGATRON*_`
                     if (lastDisconnect?.error) {
                         console.log('❗ Last Disconnect Error:', lastDisconnect.error);
                     }
-                    
+
                     const statusCode = lastDisconnect?.error?.output?.statusCode;
-                    
+
                     // Handle specific error codes
                     if (statusCode === 401) {
                         console.log('🔐 Logged out - need new QR code');
@@ -255,7 +240,7 @@ _THANKS FOR CHOOSING *X-MEGATRON*_`
                     } else if (statusCode === 515 || statusCode === 503) {
                         console.log(`🔄 Stream error (${statusCode}) - attempting to reconnect...`);
                         reconnectAttempts++;
-                        
+
                         if (reconnectAttempts <= maxReconnectAttempts) {
                             console.log(`🔄 Reconnect attempt ${reconnectAttempts}/${maxReconnectAttempts}`);
                             setTimeout(() => {
@@ -304,17 +289,6 @@ _THANKS FOR CHOOSING *X-MEGATRON*_`
     }
 
     await initiateSession();
-});
-
-// Frontend polls this every 3s after QR scanned
-router.get('/session-status', (req, res) => {
-    const token = req.query.token;
-    if (token && global._sessionReady && global._sessionReady[token]) {
-        const { sessionId } = global._sessionReady[token];
-        delete global._sessionReady[token];
-        return res.json({ ready: true, sessionId });
-    }
-    res.json({ ready: false });
 });
 
 // Global uncaught exception handler
